@@ -2,7 +2,7 @@ from django import template
 
 register = template.Library()
 
-class HtmlElement:
+class HtmlElement(object):
     def __init__(self, tag, tag_val="", **attrs):
         self.tag = tag
         self.tag_val = str(tag_val)
@@ -126,7 +126,7 @@ def pagination(url, total, limit, page):
             pg.add_subtag(item)
 
         pg.add_subtag(page_item(max_page+1, url, **page_attr))
-    
+
     # handle ">"
     prev = HtmlElement('li', **{'class': 'page-item'})
 
