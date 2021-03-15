@@ -8,9 +8,9 @@ services:
         volumes:
           - ./data/postgres:/var/lib/postgresql/data
         environment:
-          - postgres_db=web_db
-          - postgres_user=pttapp
-          - postgres_password=pttapp
+          - POSTGRES_DB=web_db
+          - POSTGRES_USER=pttapp
+          - POSTGRES_PASSWORD=pttapp
         networks:
           - proxy
 
