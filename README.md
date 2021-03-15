@@ -7,9 +7,11 @@
 - dynamic add board to crawl list (period crawl will be effective after restart Celery)
 - one-click to assign temporal crawl task to specific board
 ![](https://github.com/n3k0fi5t/ClonePttWeb/blob/main/screenshot/home.png)
+
 **Board**
 - thumbnail of Post (display first image of post if exist)
 ![](https://github.com/n3k0fi5t/ClonePttWeb/blob/main/screenshot/board.png)
+
 **Post**
 ![](https://github.com/n3k0fi5t/ClonePttWeb/blob/main/screenshot/post.png)
 
@@ -19,7 +21,7 @@
 - Using Celery and RabbitMQ for asynchronous task that do not affect website while crawling
 - Beautiful layout by Leveraging Bootstrap and Custormize Django template tag/filter
 
-## Installlation 
+## Installation
 ```
 docker-compose up
 ```
