@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load translate_images %}
+
+{% block content %}
+<div class="row">
+    <div class="card col-md-12">
+        <div class="card-body">
+        <h2 class="card-title">{{post.title}}</h2>
+        <h3 class="card-subtitle">{{post.author}}</h3>
+        {% autoescape off %}
+            <p class="card-text">{{post.content|translateimg|linebreaks}}</p>
+        {% endautoescape %}
+        </div>
+    </div>
+</div>
+{% endblock %}

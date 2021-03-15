@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load paginate_tag %}
+
+{% block content %}
+    <div class="row">
+    <h2>{{board_name}}</h2>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Title</th>
+              <th scope="col">Author</th>
+              <th scope="col">Preview</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for post in post_list %}
+                <tr>
+                    <th scope="row"><img src="{{post.image_url}}" class="img-thumbnail" width="300"></th>
+                    <th><a href="{% url 'post:post' board_name=post.board.name endpoint=post.endpoint%}">{{post.title}}</a></th>
+                    <th>{{post.author}}</th>
+                    <th>{{post.content |truncatewords:5}}...</th>
+                </tr>
+            {% empty %}
+            <tr>
+                <th scope="row">No data</th>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="col" style="float: left;">
+        <div style="float:right;">
+        {% autoescape off %}
+            {% pagination url count limit page %}
+        {% endautoescape %}
+        </div>
+    </div>
+
+    </div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load paginate_tag %}
+    {% block content %}
+        <div class='row'>
+            <div class='col-md-8'>
+            <h2>Board List</h2>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Board</th>
+                        <th scope="col">URL</th>
+                        <th scope="col">Action</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for board in board_list %}
+                        <tr>
+                            <th scope="row">{{forloop.counter}}</th>
+                            <td>{{board.name}}</td>
+                            <td><a href="{{board.url}}">{{board.url}}</a></td>
+                            <td>
+                                <form method="POST" action="{% url 'home:action'%}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="board_name" value="{{board.name}}">
+                                    <button type="submit" name="action" value="browse" class="btn btn-outline-primary"><i class="fa fa-eye"></i></button>
+                                    <button type="submit" name="action" value="crawl" class="btn btn-outline-primary"><i class="fas fa-spider"></i></button>
+                                </form>
+                            </td>
+                            <td>
+                                {% if board.status == 0 %}
+                                    <button type="button" class="btn btn-outline-success">Normal</button>
+                                {% else %}
+                                    <button type="button" class="btn btn-outline-danger">Unavailable</button>
+                                {% endif %}
+                            </td>
+
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <th scope="row">Does not have any board yet, please add it</th>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="col" style="float: left;">
+                <div style="float:right;">
+                {% autoescape off %}
+                    {% pagination url count limit page %}
+                {% endautoescape %}
+                </div>
+            </div>
+            </div>
+            <div class='col-md-4'>
+                <h3>Quick add</h3>
+                <form method="post" action="{%url 'home:home' %}">
+                    <div class="input-group">
+                        {% csrf_token %}
+                        <input type="text" class="form-control" placeholder="Board name..." name="board">
+                        <button type="submit" class="btn btn-primary" style="float: right;">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+    {% endblock %}

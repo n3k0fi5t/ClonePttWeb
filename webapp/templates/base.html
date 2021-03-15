@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+</head>
+    <body>
+        <div class="container">
+            <div class="row">
+                {% block jumbotron %}
+                    <div class="card col-md-12 text-white bg-dark">
+                        <div class="card-body">
+                        <h5 class="card-title display-3 font-italic">Django PTT Crawler</h5>
+                    </div>> ...
+                    </div>
+                {% endblock %}
+                {% block breadcrumb %}
+                    <ol class="breadcrumb col-md-12">
+                    {% for crumb_name, crumb_path in breadcrumb.items %}
+                        {% if forloop.last %}
+                        <li class="breadcrumb-item active" aria-current="page">{{crumb_name}}</li>
+                        {% else %}
+                        <li class="breadcrumb-item"><a href="{{crumb_path}}">{{crumb_name}}</a></li>
+                        {% endif %}
+                    {% empty %}
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    {% endfor %}
+                    </ol>
+                {% endblock %}
+            </div>
+
+            {% block content %}{% endblock %}
+        </div>
+
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+
+        <!-- bootstrap -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+        <!-- font library -->
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    </body>
+</html>

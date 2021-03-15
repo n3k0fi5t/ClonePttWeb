@@ -1,0 +1,3 @@
+[submodule "webapp/crawl/PttSpider"]
+	path = webapp/crawl/PttSpider
+	url = git@github.com:n3k0fi5t/PttSpider.git
