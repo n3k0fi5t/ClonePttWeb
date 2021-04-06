@@ -15,7 +15,7 @@
     {% for push in push_list %}
         <div class="card col-md-12 text-white bg-dark">
         {% autoescape off %}
-            <p class="card-text">{{push.type}} {{push.name}}: {{push.content|translateimg}}</p><p class="card-text" style="text-align: right">{{push.ipdatetime}}</p>
+            <p class="card-text">{{push.type_string}} {{push.name}}: {{push.content|translateimg}}</p><p class="card-text" style="text-align: right">{{push.ipdatetime}}</p>
         {% endautoescape %}
         </div>
     {% endfor %}

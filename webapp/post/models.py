@@ -60,7 +60,7 @@ class URLImage(models.Model):
 
 
 PUSH_TYPE_CHOICES = (
-    (Spider.PushType.ARROW, ''),
+    (Spider.PushType.ARROW, u'→'),
     (Spider.PushType.DOWN, u'噓 '),
     (Spider.PushType.UP, u'推 '),
 )
@@ -75,6 +75,9 @@ class Push(models.Model):
 
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
+    @property
+    def type_string(self):
+        return PUSH_TYPE_CHOICES[self.type][1]
     class Meta:
         db_table = 'push'
         ordering = ['create_time']
