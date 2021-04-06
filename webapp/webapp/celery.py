@@ -5,8 +5,9 @@ from celery import Celery
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webapp.settings')
+broker = os.getenv("BROKER_DSN", 'pyamqp://guest:guest@rabbitmq/')
 
-app = Celery('webapp', broker='pyamqp://rmq:password@rabbitmq/my_vhost')
+app = Celery('webapp', broker=broker, include=['crawl.tasks'])
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.
@@ -17,8 +18,3 @@ app.now = timezone.now
 
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks()
-
-
-@app.task(bind=True)
-def debug_task(self):
-    print(f'Request: {self.request!r}')

@@ -1,10 +1,14 @@
 import datetime
 
 from django.db import models
+from django.db.models.enums import Choices
 from django.db.models.fields import DateTimeField
 from django.utils import timezone
 
-from crawl import CrawlerStatus
+from crawl import (
+    CrawlerStatus,
+    Spider
+)
 
 # Create your models here.
 class Board(models.Model):
@@ -53,3 +57,24 @@ class URLImage(models.Model):
     class Meta:
         ordering = ['create_time']
         db_table = 'image_url'
+
+
+PUSH_TYPE_CHOICES = (
+    (Spider.PushType.ARROW, ''),
+    (Spider.PushType.DOWN, u'噓 '),
+    (Spider.PushType.UP, u'推 '),
+)
+
+class Push(models.Model):
+    name = models.CharField(max_length=50, blank=False)
+    type = models.IntegerField(choices=PUSH_TYPE_CHOICES)
+    content = models.TextField()
+
+    ipdatetime = models.TextField()
+    create_time = models.DateTimeField(auto_now_add=True)
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'push'
+        ordering = ['create_time']

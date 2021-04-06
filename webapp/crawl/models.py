@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.base import Model
 from post.models import Board
 from . import CrawlerStatus
 
@@ -8,6 +9,7 @@ class Crawler(models.Model):
     last_update = models.DateTimeField(auto_now=True)
 
     board = models.OneToOneField(Board, on_delete=models.CASCADE, primary_key=True)
+    last_update_page = models.IntegerField(blank=False, default=1)
 
     class Meta:
         db_table = 'crawler'

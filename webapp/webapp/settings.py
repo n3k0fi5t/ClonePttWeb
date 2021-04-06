@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
-from posix import POSIX_FADV_RANDOM
+from posix import EX_CANTCREAT, POSIX_FADV_RANDOM
 
 product_env = os.getenv("WEBAPP_ENV", "dev") == "production"
 if product_env:
@@ -141,3 +141,32 @@ if DEBUG and DB_DEBUG:
             }
         }
     }
+
+# Celery settings
+from kombu import Queue, Exchange
+
+single_exchange = Exchange('reused', type='topic')
+period_exchange = Exchange('period_tasks', type='direct')
+
+CELERY_TASK_DEFAULT_QUEUE = 'web'
+CELERY_TASK_DEFAULT_ROUTING_KEY = 'app.default'
+CELERY_TASK_QUEUES = (
+    Queue('imme', exchange=single_exchange, routing_key='imme.#'),
+    Queue('web', exchange=single_exchange, routing_key='app.#'),
+    Queue('period', exchange=period_exchange, routing_key='crawl.#'),
+)
+
+CELERY_TASK_ROUTES = {
+        'home.tasks.add_board': {
+            'queue': 'web',
+            'routing_key': 'app.add_board',
+        },
+        'crawl.tasks.period_crawl_task': {
+            'queue': 'period',
+            'routing_key': 'crawl.period',
+        },
+        'crawl.tasks.update_article': {
+            'queue': 'imme',
+            'routing_key': 'imme.update',
+        },
+}

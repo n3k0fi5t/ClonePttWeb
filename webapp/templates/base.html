@@ -13,11 +13,11 @@
                     <div class="card col-md-12 text-white bg-dark">
                         <div class="card-body">
                         <h5 class="card-title display-3 font-italic">Django PTT Crawler</h5>
-                    </div>> ...
+                        </div>> ...
                     </div>
                 {% endblock %}
                 {% block breadcrumb %}
-                    <ol class="breadcrumb col-md-12">
+                    <ol class="breadcrumb col-md-9" style="background-color: #e3f2fd;">
                     {% for crumb_name, crumb_path in breadcrumb.items %}
                         {% if forloop.last %}
                         <li class="breadcrumb-item active" aria-current="page">{{crumb_name}}</li>
@@ -28,6 +28,14 @@
                         <li class="breadcrumb-item"><a href="/">Home</a></li>
                     {% endfor %}
                     </ol>
+                    <form class="col-md-3" style="background-color: #e3f2fd; height: 48px;">
+                        <div class="input-group mb-3" style="top: 5px;">
+                            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                            <button class="btn btn-outline-dark rounded" type="submit" style="float: right;"><i class="fas fa-search"></i></button>
+                        </div>
+                    </form>
+                {% endblock %}
+                {% block navbar %}
                 {% endblock %}
             </div>
 

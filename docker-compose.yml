@@ -11,6 +11,8 @@ services:
           - POSTGRES_DB=web_db
           - POSTGRES_USER=pttapp
           - POSTGRES_PASSWORD=pttapp
+        ports:
+            - "5555:5432"
         networks:
           - proxy
 
@@ -23,6 +25,24 @@ services:
         ports:
             - "5672:5672"
             - "15672:15672"
+        networks:
+          - proxy
+    worker:
+        build: ./webapp
+        restart: always
+        depends_on:
+          - rabbitmq
+          - db
+        entrypoint: celery -A webapp worker -l INFO -Q period
+        volumes:
+          - ./webapp:/src
+        environment:
+          - WEBAPP_ENV=dev
+          - POSTGRES_HOST=db-pg
+          - POSTGRES_DB=web_db
+          - POSTGRES_USER=pttapp
+          - POSTGRES_PASSWORD=pttapp
+          - BROKER_DSN=pyamqp://rmq:password@rabbitmq/my_vhost
         networks:
           - proxy
 
@@ -39,6 +59,7 @@ services:
           - POSTGRES_DB=web_db
           - POSTGRES_USER=pttapp
           - POSTGRES_PASSWORD=pttapp
+          - BROKER_DSN=pyamqp://rmq:password@rabbitmq/my_vhost
         depends_on:
           - rabbitmq
           - db

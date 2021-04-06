@@ -4,7 +4,8 @@ from django.views import View
 
 from .tasks import add_board
 
-from crawl.tasks import crawl_board
+from crawl.tasks import period_crawl_task
+from crawl.models import Crawler
 from post.models import Board
 
 from utils.paginate import paginate
@@ -47,7 +48,13 @@ def action_default(request, board_name="", **kwargs):
     return redirect(reverse('home:home'))
 
 def action_crawl(request, board_name="", **kwargs):
-    crawl_board.delay(board_name)
+    crawler = Crawler.objects.get(board__name=board_name)
+    period_crawl_task.apply_async(
+        (board_name, crawler.last_update_page),
+        queue='web',
+        routing_key='app.for_test'
+    )
+
     return redirect(reverse('home:home'))
 
 action_list = {

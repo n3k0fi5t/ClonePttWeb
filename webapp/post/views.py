@@ -4,7 +4,10 @@ from django.views import View
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
-from .models import Post, Board
+from .models import Post, Board, Push
+
+from crawl.tasks import update_article
+from crawl.PttSpider.PttSpider import PttUrl
 
 from utils.response import http_response_data
 from utils.paginate import paginate
@@ -33,6 +36,12 @@ class PostView(View):
     def get(self, request, board_name="", endpoint=""):
         try:
             post = Post.objects.get(Q(board__name__exact=board_name), Q(endpoint=endpoint))
+            push_list = Push.objects.filter(post=post).order_by("create_time")
+
+            # lazy update article info
+            url = PttUrl.urlify(board=board_name, endpoint=post.endpoint)
+            update_article.apply_async((board_name, url))
+
         except Post.DoesNotExist:
             raise Http404()
 
@@ -40,6 +49,7 @@ class PostView(View):
             request,
             **{
                 'post': post,
+                'push_list': push_list,
             }
         )
 
