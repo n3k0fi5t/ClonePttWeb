@@ -3,10 +3,11 @@ from django.urls import reverse
 from django.views import View
 
 from .tasks import add_board
+from .actions import Action
 
 from crawl.tasks import period_crawl_task
 from crawl.models import Crawler
-from post.models import Board
+from post.models import Board, Post
 
 from utils.paginate import paginate
 from utils.response import http_response_data
@@ -34,43 +35,28 @@ class HomeView(View):
         return self.render_home(request)
 
     def post(self, request):
+        """ should be moved to actions
+        """
         args = request.POST or None
         board_name = args.get('board', "")
 
         add_board.delay(board_name)
         return self.render_home(request)
 
-
-def action_browse(request, board_name="", **kwargs):
-    return redirect(reverse('post:board', args=(board_name, )))
-
-def action_default(request, board_name="", **kwargs):
-    return redirect(reverse('home:home'))
-
-def action_crawl(request, board_name="", **kwargs):
-    crawler = Crawler.objects.get(board__name=board_name)
-    period_crawl_task.apply_async(
-        (board_name, crawler.last_update_page),
-        queue='web',
-        routing_key='app.for_test'
-    )
-
-    return redirect(reverse('home:home'))
-
-action_list = {
-    'default': action_default,
-    'browse': action_browse,
-    'crawl': action_crawl,
-}
-
 class HomeActionView(View):
     def get(self, request):
-        return redirect(reverse('home:home'))
+        action = 'default'
+
+        search = param2str(request, 'GET', 'search', "")
+        if search != "":
+            action = 'search'
+
+        handler = Action.get(action)
+        return handler(request)
 
     def post(self, request):
-        name = param2str(request, 'POST', 'board_name', "")
-        action = param2str(request, 'POST', 'action', "default")
+        action = param2str(request, 'POST', 'action', 'default')
 
-        handler = action_list.get(action, action_default)
-        return handler(request, board_name=name)
+        handler = Action.get(action)
+        return handler(request)
 

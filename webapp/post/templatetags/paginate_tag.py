@@ -1,4 +1,5 @@
 from django import template
+from urllib.parse import urlencode
 
 register = template.Library()
 
@@ -37,14 +38,9 @@ class HtmlElement(object):
         return repr
 
 
-def paged_url(url, page=0, **attr):
-    url += f"?page={page}&"
-    for k, v in attr.items():
-        url += f"{k}={v}&"
-    
-    if url[-1] == '&':
-        url = url[:-1]
-    return url
+def paged_url(url, p=0, **attr):
+    query = dict(page=p, **attr)
+    return url + '?' + urlencode(query=query)
 
 def page_item(idx, url, **page_attr):
     if idx < 1:
@@ -58,7 +54,7 @@ GAP = 3
 CONSECUTIVE = 2
 
 @register.simple_tag
-def pagination(url, total, limit, page):
+def pagination(url, total, limit, page, query):
     """ generate html pagination elements
 
     Args:
@@ -71,7 +67,9 @@ def pagination(url, total, limit, page):
         result: string of html pagination element
 
     """
-    page_attr = {'limit': limit}
+    page_attr = {k: v for k, v in query.items()}
+    page_attr.update({'limit': limit})
+    page_attr.pop('page', "")
     cur = page
 
     max_page = (total-1)//limit

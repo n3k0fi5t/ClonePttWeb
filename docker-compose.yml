@@ -54,7 +54,7 @@ services:
         volumes:
           - ./webapp:/src
         environment:
-          - WEBAPP_ENV=dev
+          - WEBAPP_ENV=production
           - POSTGRES_HOST=db-pg
           - POSTGRES_DB=web_db
           - POSTGRES_USER=pttapp

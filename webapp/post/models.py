@@ -1,9 +1,14 @@
 import datetime
+from django import conf
 
+from django.conf import settings
 from django.db import models
+from django.db.models import fields
 from django.db.models.enums import Choices
 from django.db.models.fields import DateTimeField
 from django.utils import timezone
+
+from django.contrib.postgres.search import SearchQuery, SearchVector
 
 from crawl import (
     CrawlerStatus,
@@ -32,22 +37,34 @@ class Board(models.Model):
         db_table = 'ptt_board'
 
 
+class PostManager(models.Manager):
+    def search(self, keywords, *args, **kwargs):
+        # generate ts query
+        query_kw = '|'.join(keywords)
+        query = SearchQuery(query_kw, config=settings.SEARCH_CONFIG)
+
+        # generate ts vector
+        ts = SearchVector('title', 'content', config=settings.SEARCH_CONFIG)
+        return super(PostManager, self).annotate(search=ts).filter(search=query)
+
 class Post(models.Model):
     title = models.CharField(max_length=50, blank=False)
     author = models.CharField(max_length=50, blank=False)
     content = models.TextField(blank=True)
     endpoint = models.TextField(blank=True)
-
     image_url = models.TextField(blank=True)
 
     create_time = models.DateTimeField(auto_now_add=True)
 
     board = models.ForeignKey(Board, on_delete=models.CASCADE)
 
+    objects = PostManager()
     class Meta:
-        ordering = ['create_time']
+        ordering = ['-create_time']
         db_table = 'ptt_post'
-
+        indexes = [
+            models.Index(fields=['endpoint']),
+        ]
 
 class URLImage(models.Model):
     url = models.TextField(blank=False)

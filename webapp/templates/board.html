@@ -34,7 +34,7 @@
     <div class="col" style="float: left;">
         <div style="float:right;">
         {% autoescape off %}
-            {% pagination url count limit page %}
+            {% pagination request.path count limit page request.GET %}
         {% endautoescape %}
         </div>
     </div>
