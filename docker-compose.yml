@@ -33,7 +33,8 @@ services:
         depends_on:
           - rabbitmq
           - db
-        entrypoint: celery -A webapp worker -l INFO -Q period
+            #entrypoint: celery -A webapp worker -Q period
+        entrypoint: sh /src/deploy/worker_entrypoint.sh
         volumes:
           - ./webapp:/src
         environment:

@@ -2,13 +2,15 @@ import datetime
 from django import conf
 
 from django.conf import settings
+from django.contrib.postgres import indexes
 from django.db import models
 from django.db.models import fields
 from django.db.models.enums import Choices
 from django.db.models.fields import DateTimeField
 from django.utils import timezone
 
-from django.contrib.postgres.search import SearchQuery, SearchVector
+from django.contrib.postgres.search import SearchQuery, SearchVector, SearchVectorField
+from django.contrib.postgres.indexes import GinIndex
 
 from crawl import (
     CrawlerStatus,
@@ -35,6 +37,9 @@ class Board(models.Model):
 
     class Meta:
         db_table = 'ptt_board'
+        indexes = [
+            models.Index(fields=['id', 'name']),
+        ]
 
 
 class PostManager(models.Manager):
@@ -44,8 +49,9 @@ class PostManager(models.Manager):
         query = SearchQuery(query_kw, config=settings.SEARCH_CONFIG)
 
         # generate ts vector
-        ts = SearchVector('title', 'content', config=settings.SEARCH_CONFIG)
-        return super(PostManager, self).annotate(search=ts).filter(search=query)
+        #ts = SearchVector('title', 'content', config=settings.SEARCH_CONFIG)
+        #return super(PostManager, self).annotate(search=ts).filter(search=query)
+        return super(PostManager, self).filter(tsvector=query)
 
 class Post(models.Model):
     title = models.CharField(max_length=50, blank=False)
@@ -58,12 +64,16 @@ class Post(models.Model):
 
     board = models.ForeignKey(Board, on_delete=models.CASCADE)
 
+    tsvector = SearchVectorField(blank=True, null=True)
+
     objects = PostManager()
     class Meta:
         ordering = ['-create_time']
         db_table = 'ptt_post'
         indexes = [
             models.Index(fields=['endpoint']),
+            models.Index(fields=['board', 'create_time']),
+            GinIndex(fields=['tsvector']),
         ]
 
 class URLImage(models.Model):

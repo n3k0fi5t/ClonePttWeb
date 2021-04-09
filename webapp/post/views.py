@@ -15,7 +15,10 @@ from utils.paginate import paginate
 # Create your views here.
 class BoardView(View):
     def get(self, request, board_name=""):
-        qs = Post.objects.select_related('board').filter(board__name__iexact=board_name).order_by('-create_time')
+        #qs = Post.objects.select_related('board').filter(board__name=board_name).order_by('-create_time')
+        qs = Board.objects.get(name=board_name).post_set.all().order_by('-create_time')
+        qs = qs.only('board', 'title', 'content', 'image_url', 'author', 'endpoint')
+
         paged_objs, count, page, limit = paginate(qs, request)
 
         data = http_response_data(
@@ -35,7 +38,7 @@ class BoardView(View):
 class PostView(View):
     def get(self, request, board_name="", endpoint=""):
         try:
-            post = Post.objects.get(Q(board__name__exact=board_name), Q(endpoint=endpoint))
+            post = Post.objects.get(Q(board__name=board_name), Q(endpoint=endpoint))
             push_list = Push.objects.filter(post=post).order_by("create_time")
 
             # lazy update article info
