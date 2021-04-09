@@ -1,5 +1,13 @@
+import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from hashlib import sha256
+
+import requests
+
 from celery import shared_task
+
+from logging import getLogger
+log = getLogger()
 
 from webapp import celery_app
 from post.models import (
@@ -20,6 +28,13 @@ def update_article(board, article_url, rs=None):
         hash.update(bytes(ctx, 'utf-8'))
         return hash.hexdigest()
 
+    if not isinstance(board, Board):
+        try:
+            board = Board.objects.get(name=board)
+        except Board.DoesNotExist:
+            log.warn(f"{board} not exist")
+            return
+
     spider = Spider.PttArticleSpider(url=article_url, rs=rs)
     spider.run()
 
@@ -30,17 +45,15 @@ def update_article(board, article_url, rs=None):
             'author': article.author,
             'endpoint': article.url.endpoint,
             'image_url': article.image_urls[0] if len(article.image_urls) else "",
+            'board': board,
     }
-
-    if isinstance(board, Board):
-        defaults['board'] = board
 
     post, created = Post.objects.get_or_create(
             endpoint=article.url.endpoint,
             defaults=defaults
     )
 
-    # need update content?
+    # check content should be updated
     if not created:
         old_hash = hash_content(post.content)
         new_hash = hash_content(article.content)
@@ -48,8 +61,6 @@ def update_article(board, article_url, rs=None):
         if old_hash != new_hash:
             post.content = article.content
             post.save()
-    else:
-        post.board_set.add(Board.objects.get(name=board))
 
     if post and len(article.push_list):
         push_list = []
@@ -90,6 +101,13 @@ def update_article(board, article_url, rs=None):
         )
 
 @shared_task
+def batch_update(board_name, url_list):
+    rs = requests.session()
+    board = Board.objects.get(name=board_name)
+    for url in url_list:
+        update_article(board, url, rs=rs)
+
+@shared_task
 def crawl_board(name, last_update_page):
     # get board information first
     try:
@@ -98,13 +116,18 @@ def crawl_board(name, last_update_page):
         return
 
     url = board.url
-    rs = Spider.RequestWrapper()
-    board_spider = Spider.PttArticleListSpider(url, rs=rs, last_page=last_update_page, max_fetch=500)
+    rs = requests.session()
+    board_spider = Spider.PttArticleListSpider(url, rs=rs, last_page=last_update_page, max_fetch=1000)
     board_spider.run()
 
     article_urls = board_spider.article_url_list[::-1]
-    spiders = (Spider.PttArticleSpider(url, rs=rs) for url in article_urls)
 
+    batch_size = len(article_urls)
+    for idx in range(0, len(article_urls), batch_size):
+        batch_update.apply_async((board.name, article_urls[idx:idx+batch_size]), queue='period', routing_key='crawl.update')
+
+    """
+    spiders = (Spider.PttArticleSpider(url, rs=rs) for url in article_urls)
     for spider in spiders:
         # already crawled, we can skip rest
         if Post.objects.filter(endpoint=spider.url.endpoint).exists():
@@ -139,6 +162,8 @@ def crawl_board(name, last_update_page):
             URLImage.objects.bulk_create(
                 [URLImage(url=url) for url in article.image_urls]
             )
+    """
+
     return board_spider.latest_idx
 
 def update_crawler_status(obj, status, last_update=0):
@@ -172,6 +197,7 @@ def period_crawl_task(board_name, last_update_page):
         latest_idx = crawl_board(board_name, last_update_page)
         update_crawler_status(obj, CrawlerStatus.NORMAL, last_update=latest_idx)
     except Exception as e:
+        log.warn(e)
         update_crawler_status(obj, CrawlerStatus.ERROR)
 
 
@@ -180,6 +206,6 @@ def setup_periodic_tasks(sender, *args, **kwargs):
     crawler_list = Crawler.objects.select_related('board').all()
     for crawler in crawler_list:
         sender.add_periodic_task(
-            60,
+            300,
             period_crawl_task.s(crawler.board.name, crawler.last_update_page),
         )

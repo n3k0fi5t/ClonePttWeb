@@ -42,6 +42,10 @@ CELERY_TASK_ROUTES = {
             'queue': 'period',
             'routing_key': 'crawl.period',
         },
+        'crawl.tasks.batch_update': {
+            'queue': 'period',
+            'routing_key': 'crawl.update',
+        },
         'crawl.tasks.update_article': {
             'queue': 'imme',
             'routing_key': 'imme.update',
