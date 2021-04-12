@@ -124,6 +124,42 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# Celery settings
+from kombu import Queue, Exchange
+
+single_exchange = Exchange('reused', type='topic')
+period_exchange = Exchange('period_tasks', type='direct')
+
+CELERY_TASK_DEFAULT_QUEUE = 'web'
+CELERY_TASK_DEFAULT_ROUTING_KEY = 'app.default'
+CELERY_TASK_QUEUES = (
+    Queue('imme', exchange=single_exchange, routing_key='imme.#'),
+    Queue('web', exchange=single_exchange, routing_key='app.#'),
+    Queue('period', exchange=period_exchange, routing_key='crawl.#'),
+)
+
+CELERY_TASK_ROUTES = {
+        'home.tasks.add_board': {
+            'queue': 'web',
+            'routing_key': 'app.add_board',
+        },
+        'crawl.tasks.period_crawl_task': {
+            'queue': 'period',
+            'routing_key': 'crawl.period',
+        },
+        'crawl.tasks.batch_update': {
+            'queue': 'period',
+            'routing_key': 'crawl.update',
+        },
+        'crawl.tasks.update_article': {
+            'queue': 'imme',
+            'routing_key': 'imme.update',
+        },
+}
+
+# Search engine
+SEARCH_CONFIG = 'chinese'
+
 if DEBUG and DB_DEBUG:
     LOGGING = {
         'version' : 1,
