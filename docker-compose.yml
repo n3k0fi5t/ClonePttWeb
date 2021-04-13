@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
     db:
-        image: postgres:10-alpine
+        build: ./pg
         container_name: db-pg
         restart: always
         volumes:
