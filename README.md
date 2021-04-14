@@ -1,6 +1,7 @@
 # ClonePttWeb
 ## Introduction
-**ClonePttWeb** is a project that creates a simple clone website of [PTTWeb](https://www.ptt.cc/bbs/index.html). ClonePttWeb use Django for both frontend(Django Template subsys) and backend, [PttSpider](https://github.com/n3k0fi5t/PttSpider) to crawl the data, and Celery with RabbitMQ to handle asynchronous crawling task
+**ClonePttWeb** is a project that creates a simple clone website of [PTTWeb](https://www.ptt.cc/bbs/index.html).
+ClonePttWeb use Django for both frontend(Django Template subsys) and backend, [PttSpider](https://github.com/n3k0fi5t/PttSpider) to crawl the data, Celery with RabbitMQ to handle asynchronous crawling task, and postgresql with both data storage and full text search engine.
 
 ## Screenshots
 **Home**
