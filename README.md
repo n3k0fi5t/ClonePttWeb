@@ -15,10 +15,14 @@
 **Post**
 ![](https://github.com/n3k0fi5t/ClonePttWeb/blob/main/screenshot/post.png)
 
+**Search**
+- full text search
+![](https://github.com/n3k0fi5t/ClonePttWeb/blob/main/screenshot/search.png)
+
 ## Overview
 - Based on Docker, one-click deployment
-- Seperated web server, database and message broker
-- Using Celery and RabbitMQ for asynchronous task that do not affect website while crawling
+- Seperated web server, database, and worker
+- Using Celery and RabbitMQ for asynchronous task for powerful and scalable content fetch service
 - Beautiful layout by Leveraging Bootstrap and Custormize Django template tag/filter
 
 ## Installation
