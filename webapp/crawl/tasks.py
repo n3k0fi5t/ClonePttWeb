@@ -123,46 +123,9 @@ def crawl_board(name, last_update_page):
     article_urls = board_spider.article_url_list[::-1]
 
     batch_size = len(article_urls)
-    for idx in range(0, len(article_urls), batch_size):
-        batch_update.apply_async((board.name, article_urls[idx:idx+batch_size]), queue='period', routing_key='crawl.update')
-
-    """
-    spiders = (Spider.PttArticleSpider(url, rs=rs) for url in article_urls)
-    for spider in spiders:
-        # already crawled, we can skip rest
-        if Post.objects.filter(endpoint=spider.url.endpoint).exists():
-            continue
-        spider.run()
-
-        article = spider.article
-
-        post, _ = Post.objects.get_or_create(
-                endpoint=article.url.endpoint,
-                defaults={
-                    'title': article.title,
-                    'content': article.content,
-                    'author': article.author,
-                    'endpoint': article.url.endpoint,
-                    'image_url': article.image_urls[0] if len(article.image_urls) else "",
-                    'board': board
-        })
-
-        if post and len(article.push_list):
-            Push.objects.bulk_create(
-                [Push(
-                    name=push.name,
-                    type=push.type,
-                    content=push.content,
-                    ipdatetime=push.date,
-                    post=post,
-                ) for push in article.push_list]
-            )
-
-        if post and len(article.image_urls):
-            URLImage.objects.bulk_create(
-                [URLImage(url=url) for url in article.image_urls]
-            )
-    """
+    if batch_size != 0:
+        for idx in range(0, len(article_urls), batch_size):
+            batch_update.apply_async((board.name, article_urls[idx:idx+batch_size]), queue='period', routing_key='crawl.update')
 
     return board_spider.latest_idx
 
